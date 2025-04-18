@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap'); 
+@import "tailwindcss";
+
+body {
+  font-family: 'Jakarta Sans', sans-serif;
+}
+
+.PhoneInputInput:focus {
+  outline: none;
+}
+
+/* Style the country dropdown container */
+.PhoneInputCountrySelect {
+  background-color: #1A1D21 !important; /* Dark background */
+  border: 1px solid #363A3D !important;
+  color: white !important;
+}
+
+/* Style each country option */
+.PhoneInputCountrySelect option,
+.PhoneInputCountryOption {
+  background-color: #1A1D21 !important; /* Match dark theme */
+  color: white !important; /* Ensure text is readable */
+  padding: 8px;
+}
+
+/* Highlight the selected country */
+.PhoneInputCountryOption:focus,
+.PhoneInputCountryOption:hover {
+  background-color: #24AE7C !important; /* Green hover effect */
+  color: white !important;
+}
+
+input[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #1A1D21;
+  color: white;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #363A3D;
+  border-radius: 10px;
+  position: relative;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  pointer-events: none; /* completely hide default icon */
+}
