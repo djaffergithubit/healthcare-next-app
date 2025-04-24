@@ -17,7 +17,9 @@ import userIcon from "../assets/icon.png"
 const Home = () => {
   const [phoneNumber, setPhoneNumber] = useState()
   const [divClicked, setDivClicked] = useState('')
+  const [isPending, setIsPending] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')  
+
   const router = useRouter()
 
   const user =  {
@@ -28,10 +30,12 @@ const Home = () => {
   const register = async (user) => {
       await axios.post('/api/users', {full_name: user.full_name, email_address: user.email_address, phone_number: phoneNumber})
       .then((response) => {
+        setIsPending(false)
         setPhoneNumber()
-        !response.data.exist && router.push('/user-profile')
+        !response.data.exist ? router.push('/user-profile') : router.push('/appointment-page')
       })
       .catch((err) => {
+        setIsPending(false)
         setPhoneNumber()
         setErrorMessage("There was an error creating your account. Please try again.")  
         console.error(err)
@@ -39,13 +43,13 @@ const Home = () => {
   }
 
   const formSubmit = async(prevState, data) => {
+    setIsPending(true)
     for(const key in user){
       user[key] = data.get(key)
     }
 
-    if (user.full_name && user.email_address && phoneNumber && isValidPhoneNumber(phoneNumber)) {
-      await register(user)
-    }
+    (phoneNumber && isValidPhoneNumber(phoneNumber)) ? await register(user) : console.log('Invalid Phone Number');
+    
   }
 
   const [userForm, formAction] = useActionState(formSubmit, user)
@@ -89,7 +93,7 @@ const Home = () => {
               </div>
             </div>
 
-            <Button content={'Get started'} />
+            <Button isPending={isPending} content={'Get started'} />
 
           </form>
 

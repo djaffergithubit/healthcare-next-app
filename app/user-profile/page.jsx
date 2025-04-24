@@ -4,7 +4,7 @@ import React, { useActionState, useEffect, useState } from 'react'
 import Logo from '@/components/Logo'
 import Image from 'next/image'
 import illustration from "../../assets/Illustration.png"
-import PhoneInput from 'react-phone-number-input'
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 import emailIcon from "../../assets/icon (1).png"
 import SelectInput from '@/components/SelectInput'
@@ -14,24 +14,20 @@ import axios from 'axios'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { Calendar } from 'lucide-react'
-
-// const identificationDocumentOptions = [
-//   { value: 'birth_certificate', label: 'Birth Certificate' },
-//   { value: 'passport', label: 'Passport' },
-//   { value: 'drivers_license', label: 'Driver’s License' },
-//   { value: 'national_card', label: 'National Card' },
-// ];
-const doctors = []
+import { useDoctors, useOptions } from '@/utils'
+import { useRouter } from 'next/navigation'
 
 const page = () => {
+  const doctors = useDoctors()
+  const options = useOptions(doctors)
   const [currentUser, setCurrentUser] = useState()
   const [phoneNumber, setPhoneNumber] = useState()
-  const [selectDoctor, setSelectDoctor] = useState(null);
-  // const [selectIdentificationDoc, setSelectIdentificationDoc] = useState(null);
-  // const [preview, setPreview] = useState(null)
+  const [selectDoctor, setSelectDoctor] = useState();
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [selectedDate, setSelectedDate] = useState(null)
+  const [isPending, setIsPending] = useState(false)
+  const router = useRouter()
 
   const infos = {
     full_name: fullName,
@@ -45,23 +41,41 @@ const page = () => {
     Current_medications: "",
     Family_medical_history: "",
     Past_medical_history: "",
-    identification_Document: "",
   }
 
   const formSubmission = async(prevState, data) => {
+    setIsPending(true)
     for (const key in infos) {
       infos[key] = data.get(key)
     } 
 
-    await axios.put('/api/users', { dateOfBirth: selectedDate, address: infos.Address }, {
+    (phoneNumber && isValidPhoneNumber) ? await axios.put('/api/users', {
+      fullName: infos.full_name,
+      email: infos.email_address,
+      phoneNumber: phoneNumber,
+      dateOfBirth: selectedDate,
+      address: infos.Address,
+      occupation: infos.occupation,
+      emergencyContactName: infos.emergency_contact_name,
+      primaryCarePhysician: doctors?.find((doc) => doc.fullName == (selectDoctor.value).replace('Dr. ', ''))?._id,
+      insuranceProvider: infos.Insurance_provider,
+      insurancePolicyNumber: infos.Insurance_policy_number,
+      allergies: infos.Allergies,
+      currentMedications: infos.Current_medications,
+      familyMedicalHistory: infos.Family_medical_history,
+      pastMedicalHistory: infos.Past_medical_history
+    }, {
       withCredentials: true
     })
     .then((response) => {
-      console.log(response.data)
+      setIsPending(true)
+      console.log(response.data.data)
+      router.push('/appointment-page')
     })
     .catch((error) => {
+      setIsPending(true)
       console.error(error)
-    })
+    }): console.log("Invalid phone number")
   }
 
   const [userInformation, formAction] = useActionState(formSubmission, infos)
@@ -79,7 +93,7 @@ const page = () => {
     .catch((err) => {
         console.error(err);
     })
-}
+  }
 
   useEffect(() => {
     userProfile()
@@ -151,7 +165,7 @@ const page = () => {
 
             <div className=' flex flex-col gap-y-1.5 lg:col-span-6 col-span-12 w-full'>
               <label className=' text-sm text-[#ABB8C4] font-medium' htmlFor="">Emergency contact name</label>            
-              <input type="text" placeholder='Guardian’s name' name='emergency_contact_name ' className=' py-2.5 outline-none px-2.5 rounded-xl text-white text-sm bg-[#1A1D21] w-full gap-2 border-[1px] border-solid border-[#363A3D]' />
+              <input type="text" placeholder='Guardian’s name' name='emergency_contact_name' className=' py-2.5 outline-none px-2.5 rounded-xl text-white text-sm bg-[#1A1D21] w-full gap-2 border-[1px] border-solid border-[#363A3D]' />
             </div>
 
           </section>
@@ -160,7 +174,7 @@ const page = () => {
           <div className=' flex flex-col gap-y-1.5 '>
               <label className=' text-sm text-[#ABB8C4] font-medium' htmlFor="">Primary care physician</label>            
               {/* <input type="text" placeholder='ex: djef' name='Primary_care_physician' className=' py-2.5 outline-none px-2.5 rounded-xl text-white text-sm bg-[#1A1D21] w-full gap-2 border-[1px] border-solid border-[#678397]' /> */}
-              <SelectInput instanceId={"id-1"} selectedOption={selectDoctor} setSelectedOption={setSelectDoctor} options={doctors} />
+              <SelectInput instanceId={"id-1"} selectedOption={selectDoctor} setSelectedOption={setSelectDoctor} options={options} />
           </div>
           <section className=' grid grid-cols-12 gap-x-3.5 gap-y-4 '>
               <div className=' flex flex-col gap-y-1.5 lg:col-span-6 col-span-12 w-full'>
@@ -233,7 +247,7 @@ const page = () => {
             />
             <span className="text-[#ABB8C4] text-lg">I acknowledge that I have reviewed and agree to the privacy policy</span>
           </label> */}
-          <Button content={"Submit and continue"} />
+          <Button content={"Submit and continue"} isPending={isPending} />
         </form>
       </div>
       <div className=' md:col-span-3 md:block hidden w-full'>

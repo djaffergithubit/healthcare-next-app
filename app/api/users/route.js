@@ -69,7 +69,7 @@ export const GET = async (request) => {
   const user = isAuth(request);
 
   await Connect();
-  const userFound = await User.findOne({_id: user.userId })
+  const userFound = await User.findOne({_id: user.userId }).populate('primaryCarePhysician', 'fullName doctorProfile')
 
   if (!userFound) {
     return NextResponse.json({ msg: "user doesn\'t exist" })
@@ -89,11 +89,41 @@ export async function PUT(request){
     try {
         const user = isAuth(request)
         const body = await request.json()
-        const { dateOfBirth, address } = body
+        const { 
+            fullName,
+            email,
+            phoneNumber,
+            dateOfBirth,
+            address,
+            occupation,
+            emergencyContactName,
+            primaryCarePhysician,
+            insuranceProvider,
+            insurancePolicyNumber,
+            allergies,
+            currentMedications,
+            familyMedicalHistory,
+            pastMedicalHistory,
+         } = body
 
         await Connect()
         console.log('data', dateOfBirth, address);
-        const data = {dateOfBirth: dateOfBirth, address: address}
+        const data = {
+            fullName,
+            email,
+            phoneNumber,
+            dateOfBirth,
+            address,
+            occupation,
+            emergencyContactName,
+            primaryCarePhysician,
+            insuranceProvider,
+            insurancePolicyNumber,
+            allergies,
+            currentMedications,
+            familyMedicalHistory,
+            pastMedicalHistory
+        }
 
         const userFound = await User.findOne({ _id: user.userId })
 
@@ -108,4 +138,16 @@ export async function PUT(request){
     } catch (error) {
         return NextResponse.json({ msg: error.message }, { status: 500 })
     }
+}
+
+export async function DELETE(){
+    const response = NextResponse.json({ "msg": "user logged out successfully" })
+
+    response.cookies.set("token", "", {
+        httpOnly: true,
+        expires: new Date(0),
+        path: '/'
+    })
+
+    return response
 }

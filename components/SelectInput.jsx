@@ -142,6 +142,7 @@ export default function SelectInput({ selectedOption, setSelectedOption, doctors
         options={options}
         styles={!doctors ? customStyles : SingleCustomStyles}
         placeholder="Select an option"
+        required
       />
     </div>
   );
