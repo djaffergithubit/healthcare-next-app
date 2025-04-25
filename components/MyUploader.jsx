@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import uploadIcon from "../assets/upload-cloud-02.svg";
-import docIcon from "../assets/upload-cloud-02.svg";
+import uploadIcon from "@/assets/upload-cloud-02.svg";
+import docIcon from "@/assets/upload-cloud-02.svg";
 import Image from "next/image";
-import pdfIcon from "../assets/pdfjpg.jpg";
-import closeIcon from "../assets/close.png";
+import pdfIcon from "@/assets/pdfjpg.jpg";
+import closeIcon from "@/assets/close.png";
 
 export default function MyUploader({ preview, setPreview }) {
   const [fileInfo, setFileInfo] = useState(null);

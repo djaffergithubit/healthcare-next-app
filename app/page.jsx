@@ -3,8 +3,8 @@
 import Image from 'next/image'
 import React, { useActionState, useEffect, useState } from 'react'
 import './globals.css'
-import bgImage from "../assets/image 21.png"
-import emailIcon from "../assets/icon (1).png"
+import bgImage from "@/assets/image 21.png"
+import emailIcon from "@/assets/icon (1).png"
 import 'react-phone-number-input/style.css'
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
 import Link from 'next/link'
@@ -12,7 +12,7 @@ import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/Button'
 import Logo from '@/components/Logo'
-import userIcon from "../assets/icon.png"
+import userIcon from "@/assets/icon.png"
 
 const Home = () => {
   const [phoneNumber, setPhoneNumber] = useState()

@@ -28,7 +28,7 @@ export async function POST(request){
         })
 
         await newAppointment.save()
-        return NextResponse.json({ 'msg': "New appointment has been created" }, {status: 201})
+        return NextResponse.json({ 'msg': "New appointment has been created", appointmentId: newAppointment._id }, {status: 201})
 
     } catch (error) {
         return NextResponse.json({ 'msg': error.message }, {status: 500})

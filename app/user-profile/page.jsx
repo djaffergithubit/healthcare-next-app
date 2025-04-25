@@ -3,10 +3,10 @@
 import React, { useActionState, useEffect, useState } from 'react'
 import Logo from '@/components/Logo'
 import Image from 'next/image'
-import illustration from "../../assets/Illustration.png"
+import illustration from "@/assets/Illustration.png"
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
-import emailIcon from "../../assets/icon (1).png"
+import emailIcon from "@/assets/icon (1).png"
 import SelectInput from '@/components/SelectInput'
 import MyUploader from '@/components/MyUploader'
 import Button from '@/components/Button'

@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import React from 'react'
-import logoPath from "../assets/logo.png"
+import logoPath from "@/assets/logo.png"
 import { useRouter } from 'next/navigation'
 
 const Logo = () => {

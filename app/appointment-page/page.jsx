@@ -8,9 +8,10 @@ import { Calendar } from 'lucide-react'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Image from 'next/image'
-import bgImage from "../../assets/bg.png"
-import { logout, useDoctors, useOptions } from '@/utils'
+import bgImage from "@/assets/bg.png"
+import { useDoctors, useOptions } from '@/utils'
 import axios from 'axios'
+import { useRouter } from 'next/navigation'
 
 const page = () => {
     const doctors = useDoctors()
@@ -18,6 +19,7 @@ const page = () => {
     const [selectedDate, setSelectedDate] = useState(null)
     const [isPending, setIsPending] = useState(false)
     const options = useOptions(doctors)
+    const router = useRouter()
 
     const appointmentDetails = {
         reasonOfAppointment: "",
@@ -42,6 +44,7 @@ const page = () => {
             .then((response) => {
                 setIsPending(false)
                 console.log(response.data);
+                router.push(`/appointment-page/success-page/${response.data?.appointmentId}`)
                 setSelectedDate(null)
             })
             .catch((err) => {
@@ -63,7 +66,6 @@ const page = () => {
                 <p className=' text-[#ABB8C4] text-sm font-medium'>Request a new appointment in 10 seconds</p>
                 <br/>
             </section>
-            <button className=' text-white text-lg font-semibold' onClick={logout}>Log out</button>
             <form className=' flex flex-col gap-x-3.5 gap-y-4 w-full' action={actionForm}>
                 <div className=' flex flex-col gap-y-1.5 '>
                     <label className=' text-sm text-[#ABB8C4] font-medium' htmlFor="">Doctor</label>            
@@ -86,14 +88,17 @@ const page = () => {
                         <DatePicker
                             selected={selectedDate}
                             onChange={(date) => setSelectedDate(date)}
-                            placeholderText="Select your appointment date"
+                            placeholderText="Select your appointment date & time"
                             className="py-2.5 px-10 text-white text-sm bg-[#1A1D21] border border-[#363A3D] w-full rounded-xl outline-none"
-                            dateFormat="dd/MM/yyyy"
+                            dateFormat="dd/MM/yyyy h:mm aa"
+                            showTimeSelect
+                            timeIntervals={15} // you can change this to 30 or 60 if needed
                             wrapperClassName="w-full"
                             required
                         />
                         <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#ABB8C4] w-5 h-5" />
                     </div>
+
                 </div>
 
                 
