@@ -18,6 +18,6 @@ export async function GET(request, {params}) {
         return NextResponse.json({ "msg": "get your data", appointment: appointment })
     }
     catch(error){
-        return NextResponse.json({ "msg": error.message }, {status: 500})
+        return NextResponse.json({ "msg": "Something went wrong!" }, {status: 500})
     }
 }

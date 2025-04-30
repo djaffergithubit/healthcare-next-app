@@ -1,6 +1,6 @@
 import axios from "axios"
-import Cookies from "js-cookie"
 import { useEffect, useState } from "react"
+import { toast } from "react-toastify"
 
 export const useCurrentUser = () => {
     const [user, setUser] = useState()
@@ -11,6 +11,7 @@ export const useCurrentUser = () => {
             setUser(response.data.user)
         })
         .catch((err) => {
+          toast.error("Something Went wrong! Please try again.")
             console.error(err);
         })
     }
@@ -24,15 +25,22 @@ export const useCurrentUser = () => {
 
 export const useDoctors = () => {
     const [doctors, setDoctors] = useState([]);
+    const [isLoading, setIsLoading] = useState(false)
   
     useEffect(() => {
       const fetchDoctors = async () => {
+        setIsLoading(true)
         try {
           const response = await axios.get('/api/doctors', {
             withCredentials: true,
           });
           setDoctors(response.data.data);
+          setIsLoading(false)
         } catch (err) {
+          setIsLoading(false)
+          toast.error("Something went wrong! Please try again.", {
+            position: "top-right"
+          })
           console.error(err);
         }
       };
@@ -40,7 +48,7 @@ export const useDoctors = () => {
       fetchDoctors();
     }, []);
 
-    return doctors
+    return {isLoading, doctors}
 }
 
 export const useOptions = (doctors) => {

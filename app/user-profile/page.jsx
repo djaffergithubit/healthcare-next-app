@@ -8,17 +8,20 @@ import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 import emailIcon from "@/assets/icon (1).png"
 import SelectInput from '@/components/SelectInput'
-import MyUploader from '@/components/MyUploader'
 import Button from '@/components/Button'
 import axios from 'axios'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-import { Calendar } from 'lucide-react'
+import { Calendar, Loader2 } from 'lucide-react'
 import { useDoctors, useOptions } from '@/utils'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { toast } from 'react-toastify'
 
 const page = () => {
-  const doctors = useDoctors()
+  const {isLoading, doctors} = useDoctors()
+  const searchParams = useSearchParams()
+  const msg = searchParams.get('successMsg')
+  const hasShownToast = React.useRef(false)
   const options = useOptions(doctors)
   const [currentUser, setCurrentUser] = useState()
   const [phoneNumber, setPhoneNumber] = useState()
@@ -68,14 +71,17 @@ const page = () => {
       withCredentials: true
     })
     .then((response) => {
-      setIsPending(true)
+      setIsPending(false)
       console.log(response.data.data)
       router.push('/appointment-page')
     })
     .catch((error) => {
-      setIsPending(true)
+      setIsPending(false)
       console.error(error)
-    }): console.log("Invalid phone number")
+    }): toast.error('Invalid phone Number', {
+      position: "top-center",
+      autoClose: 3000
+    });setIsPending(false)
   }
 
   const [userInformation, formAction] = useActionState(formSubmission, infos)
@@ -99,8 +105,18 @@ const page = () => {
     userProfile()
   }, [])
 
+  useEffect(() => {
+      if (msg && !isLoading && !hasShownToast.current) {
+          toast.success(msg, {
+              position: "top-right",
+              autoClose: 3000
+          })
+          hasShownToast.current = true
+      }
+  }, [])
+
   return (
-    <div className=' grid grid-cols-12'>
+    !isLoading ? <div className=' grid grid-cols-12'>
       <div className=' md:col-span-9 md:block col-span-12 w-full px-10 py-4'>
         <Logo />
         <section className=' mt-16 flex flex-col justify-center'>
@@ -207,46 +223,6 @@ const page = () => {
                   <textarea name="Past_medical_history" className=' py-2.5 outline-none px-2.5 rounded-xl text-white text-sm bg-[#1A1D21] w-full gap-2 border-[1px] border-solid border-[#363A3D] resize-none' placeholder='ex: Asthma diagnosis in childhood' id="" rows={3} required></textarea>
               </div>
           </section>
-          {/* <h3 className=' text-2xl font-bold text-white'>Identification and Verfication</h3>
-          <br />
-          <div className=' flex flex-col gap-y-1.5 '>
-              <label className=' text-sm text-[#ABB8C4] font-medium' htmlFor="">Identification type</label>            
-              <SelectInput instanceId={"id-2"} selectedOption={selectIdentificationDoc} setSelectedOption={setSelectIdentificationDoc} options={identificationDocumentOptions}/>
-          </div>
-          <div className=' flex flex-col gap-y-1.5 col-span-6 w-full'>
-            <label className=' text-sm text-[#ABB8C4] font-medium' htmlFor="">Identification Number</label>            
-            <input type="text" placeholder='ex 1234567' name='Identification_Number' className=' py-2.5 outline-none px-2.5 rounded-xl text-white text-sm bg-[#1A1D21] w-full gap-2 border-[1px] border-solid border-[#363A3D]' />
-          </div>
-
-          <div className='flex flex-col gap-y-1.5 col-span-6 w-full'>
-            <label className='text-sm text-[#ABB8C4] font-medium' htmlFor="">Scanned Copy of Identification Document</label>
-            <MyUploader preview={preview} setPreview={setPreview} />
-          </div> */}
-          {/* <h3 className=' text-2xl font-bold text-white'>Consent and Privacy</h3> */}
-
-          {/* <label className="inline-flex items-center space-x-2 cursor-pointer">
-            <input
-              type="checkbox"
-              className="w-5 h-5 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
-            />
-            <span className="text-[#ABB8C4] text-lg">I consent to receive treatment for my health condition.</span>
-          </label>
-
-          <label className="inline-flex items-center space-x-2 cursor-pointer">
-            <input
-              type="checkbox"
-              className="w-5 h-5 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
-            />
-            <span className="text-[#ABB8C4] text-lg">I consent to the use and disclosure of my health information for treatment purposes.</span>
-          </label>
-
-          <label className="inline-flex items-center space-x-2 cursor-pointer">
-            <input
-              type="checkbox"
-              className="w-5 h-5 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
-            />
-            <span className="text-[#ABB8C4] text-lg">I acknowledge that I have reviewed and agree to the privacy policy</span>
-          </label> */}
           <Button content={"Submit and continue"} isPending={isPending} />
         </form>
       </div>
@@ -254,6 +230,13 @@ const page = () => {
         <Image src={illustration} alt='Illustration Image' className=' h-screen' priority />
       </div>
     </div>
+    : 
+    (
+      <div className="flex items-center justify-center h-screen text-white bg-[#0D1117]">
+          <Loader2 className="w-6 h-6 animate-spin mr-2" />
+          <span>Loading...</span>
+      </div>
+    )
   )
 }
 

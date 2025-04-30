@@ -27,7 +27,7 @@ export async function POST(request) {
         return NextResponse.json({ msg: "Doctor created successfully" }, {status: 201})
 
     } catch (error) {
-        return NextResponse.json( { msg: error.message } , {status: 500})
+        return NextResponse.json( { msg: "Something went wrong!" } , {status: 500})
     }
 }
 
@@ -45,6 +45,6 @@ export async function GET(request){
         return NextResponse.json({ data:doctors }, {status: 200})
 
     } catch (error) {
-        return NextResponse.json({ "msg": error.message }, { status: 500 })
+        return NextResponse.json({ "msg": "Something went wrong!" }, { status: 500 })
     }
 }

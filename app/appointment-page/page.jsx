@@ -4,20 +4,24 @@ import Button from '@/components/Button'
 import Logo from '@/components/Logo'
 import SelectInput from '@/components/SelectInput'
 import React, { useActionState, useEffect, useState } from 'react'
-import { Calendar } from 'lucide-react'
+import { Calendar, Loader2 } from 'lucide-react'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Image from 'next/image'
 import bgImage from "@/assets/bg.png"
 import { useDoctors, useOptions } from '@/utils'
 import axios from 'axios'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { toast } from 'react-toastify'
 
 const page = () => {
-    const doctors = useDoctors()
+    const { isLoading, doctors } = useDoctors()
     const [selectDoctor, setSelectDoctor] = useState()
     const [selectedDate, setSelectedDate] = useState(null)
     const [isPending, setIsPending] = useState(false)
+    const searchParams = useSearchParams()
+    const msg = searchParams.get('successMsg')
+    const hasShownToast = React.useRef(false)
     const options = useOptions(doctors)
     const router = useRouter()
 
@@ -44,21 +48,37 @@ const page = () => {
             .then((response) => {
                 setIsPending(false)
                 console.log(response.data);
-                router.push(`/appointment-page/success-page/${response.data?.appointmentId}`)
                 setSelectedDate(null)
+                router.push(`/appointment-page/success-page/${response.data?.appointmentId}?successMsg=${encodeURIComponent(response.data.msg)}`)
             })
-            .catch((err) => {
+            .catch((err) => {   
                 setIsPending(false)
+                toast.error("Something went wrong! Please Try again.", {
+                    position: "top-right"
+                })
                 console.error(err);
             })
         : 
-            console.log("Please select a doctor and date" );
+            toast.error("Please fullfill all fields and try again!", {
+                position: "top-center",
+                autoClose: 3000
+            }); setIsPending(false)
     }
 
     const [appointment, actionForm] = useActionState(submitForm, appointmentDetails)
 
+    useEffect(() => {
+        if (msg && !isLoading && !hasShownToast.current) {
+            toast.success(msg, {
+                position: "top-right",
+                autoClose: 3000
+            })
+            hasShownToast.current = true
+        }
+    }, [])
+
   return (
-    <main className='grid grid-cols-12'>
+    !isLoading ? <main className='grid grid-cols-12'>
         <div className='md:px-14 px-8 md:py-6 py-3 md:col-span-9 col-span-12 w-full'>
             <Logo />
             <section className=' mt-16 flex flex-col justify-center'>
@@ -111,6 +131,12 @@ const page = () => {
             <Image src={bgImage} className=' h-screen' alt='' priority />
         </div>
     </main>
+    : (
+        <div className="flex items-center justify-center h-screen text-white bg-[#0D1117]">
+            <Loader2 className="w-6 h-6 animate-spin mr-2" />
+            <span>Loading...</span>
+        </div>
+    )
   )
 }
 

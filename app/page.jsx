@@ -7,18 +7,20 @@ import bgImage from "@/assets/image 21.png"
 import emailIcon from "@/assets/icon (1).png"
 import 'react-phone-number-input/style.css'
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input'
-import Link from 'next/link'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/Button'
 import Logo from '@/components/Logo'
 import userIcon from "@/assets/icon.png"
+import { toast } from 'react-toastify'
+import ReactOtpInput from '@/components/ReactOtpInput'
 
 const Home = () => {
   const [phoneNumber, setPhoneNumber] = useState()
   const [divClicked, setDivClicked] = useState('')
   const [isPending, setIsPending] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')  
+  const [errorMessage, setErrorMessage] = useState('') 
+  const [showOpt, setShowOpt] = useState(false)
 
   const router = useRouter()
 
@@ -32,7 +34,7 @@ const Home = () => {
       .then((response) => {
         setIsPending(false)
         setPhoneNumber()
-        !response.data.exist ? router.push('/user-profile') : router.push('/appointment-page')
+        response.data.exist ? router.push(`/appointment-page?successMsg=${encodeURIComponent(response.data.msg)}`) : router.push(`/user-profile?successMsg=${encodeURIComponent(response.data.msg)}`)
       })
       .catch((err) => {
         setIsPending(false)
@@ -48,18 +50,22 @@ const Home = () => {
       user[key] = data.get(key)
     }
 
-    (phoneNumber && isValidPhoneNumber(phoneNumber)) ? await register(user) : console.log('Invalid Phone Number');
+    (phoneNumber && isValidPhoneNumber(phoneNumber)) ? await register(user) : toast.error("Invalid Phone Number", {
+      position: "top-center",
+      autoClose: 3000
+    });setIsPending(false)
     
   }
 
   const [userForm, formAction] = useActionState(formSubmit, user)
   
   return (
-    <main className='grid grid-cols-12 h-screen'>
+    <main className='grid grid-cols-12 h-full relative'>
       <section className=' md:col-span-7 col-span-12 w-full h-full lg:px-24 md:px-14 sm:px-8 px-4 py-4 flex flex-col'>
         <Logo />
+        <button className=' text-xl font-semibold text-white' onClick={async () => { await axios.delete('/api/users') }}>Logout</button>
         <br />
-        <section className=' mt-16 flex flex-col justify-center'>
+        <section className=' mt-16 flex flex-col justify-center mb-2'>
           <h3 className=' mb-1 text-2xl text-white font-bold'>Hi there, ....</h3>
           <p className=' text-[#ABB8C4] text-sm font-medium'>Get Started with Appointments.</p>
           <br/>
@@ -102,13 +108,14 @@ const Home = () => {
         
         <div className=' flex items-center justify-between mt-auto'>
           <p className='text-[#ABB8C4] text-sm font-medium'>@carepulse copyright</p>
-          <Link href={'#'} className='text-sm font-medium text-[#24AE7C]'>Admin</Link>
+          <button className='text-sm font-medium text-[#24AE7C] cursor-pointer' onClick={() => setShowOpt(true)}>Admin</button>
         </div>
       </section>
 
       <div className=' md:col-span-5 md:block hidden w-full h-screen'>
         <Image src={bgImage} alt='' className=' w-full h-full' priority />
       </div>
+      {showOpt && <ReactOtpInput setShowOpt={setShowOpt} />}
     </main>
   )
 }

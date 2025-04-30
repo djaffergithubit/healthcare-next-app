@@ -6,15 +6,19 @@ import checkCircle from "@/assets/check-circle.svg"
 import Image from 'next/image'
 import docImage from "@/assets/Avatar.png"
 import { Calendar, Loader2 } from 'lucide-react'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import axios from 'axios'
 import { formatDateTime } from '@/utils/formateDate'
+import { toast } from 'react-toastify'
 
 const page = ({ params }) => {
 
+    const searchParams = useSearchParams()
+    const msg = searchParams.get('successMsg')
     const { appointment_id } = useParams()
     const [isLoading, setIsLoading] = useState(false)
     const [currentAppointment, setCurrentAppointment] = useState()
+    const hasShownToast = React.useRef(false)
 
     useEffect(() => {
         const getAppointmentDetails = async () => {
@@ -35,6 +39,16 @@ const page = ({ params }) => {
         getAppointmentDetails()
     }, [params])
 
+    useEffect(() => {
+        if (msg && !isLoading && !hasShownToast.current) {
+            toast.success(msg, {
+                position: "top-right",
+                autoClose: 3000
+            })
+            hasShownToast.current = true
+        }
+    }, [])
+    
   return (
     !isLoading ? 
         <main className=' flex flex-col items-center px-14 py-8 h-screen'>
